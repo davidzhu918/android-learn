@@ -24,13 +24,16 @@ public class CrimeLab {
     private CrimeLab(Context context) {
         mCrimes = new HashMap<>();
         mCrimesList = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            Crime crime = new Crime();
-            crime.setTitle("Crime #" + i);
-            crime.setSolved(i % 2 == 0);
-            mCrimes.put(crime.getId(), crime);
-            mCrimesList.add(crime);
-        }
+    }
+
+    public void addCrime(Crime c) {
+        mCrimesList.add(c);
+        mCrimes.put(c.getId(), c);
+    }
+
+    public void deleteCrime(Crime c) {
+        mCrimesList.remove(c);
+        mCrimes.remove(c.getId());
     }
 
     public List<Crime> getCrimes() {
