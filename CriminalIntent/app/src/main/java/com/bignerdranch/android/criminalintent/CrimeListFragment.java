@@ -128,6 +128,7 @@ public class CrimeListFragment extends Fragment {
             mAdapter = new CrimeAdapter(crimes);
             mCrimeRecyclerView.setAdapter(mAdapter);
         } else {
+            mAdapter.setmCrimes(crimes);
             Log.d("DELETE_DEBUG", "mCrimeChangedID = " + mCrimeChangedId);
             if (mCrimeChangedId != -1) {
                 mAdapter.notifyItemChanged(mCrimeChangedId);
@@ -197,6 +198,10 @@ public class CrimeListFragment extends Fragment {
         @Override
         public int getItemCount() {
             return mCrimes.size();
+        }
+
+        public void setmCrimes(List<Crime> crimes) {
+            mCrimes = crimes;
         }
     }
 }
