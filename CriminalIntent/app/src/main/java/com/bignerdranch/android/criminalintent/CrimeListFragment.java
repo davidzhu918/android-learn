@@ -75,9 +75,8 @@ public class CrimeListFragment extends Fragment {
                         List<Crime> crimes = CrimeLab.get(getActivity()).getCrimes();
                         Crime crimeToRemove = crimes.get(viewHolder.getAdapterPosition());
                         CrimeLab.get(getActivity()).deleteCrime(crimeToRemove);
-                        crimes.remove(crimeToRemove);
-                        mAdapter.setmCrimes(crimes);
-                        mAdapter.notifyDataSetChanged();
+                        mCrimeChangedId = -1;
+                        updateUI();
                     }
                 });
         mIth.attachToRecyclerView(mCrimeRecyclerView);
