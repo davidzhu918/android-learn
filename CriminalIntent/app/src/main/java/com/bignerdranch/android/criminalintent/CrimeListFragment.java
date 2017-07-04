@@ -1,12 +1,14 @@
 package com.bignerdranch.android.criminalintent;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,6 +21,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import static android.support.v7.widget.RecyclerView.*;
+
 public class CrimeListFragment extends Fragment {
     private static final String SAVED_SUBTITLE_VISIBLE = "subtitle";
     private static final int REQUEST_EDIT = 0;
@@ -27,6 +31,20 @@ public class CrimeListFragment extends Fragment {
     private CrimeAdapter mAdapter;
     private int mCrimeChangedId;
     private boolean mSubtitleVisible;
+    private Callbacks mCallbacks;
+
+    /**
+     * Required interface for hosting activities
+     */
+    public interface Callbacks {
+        void onCrimeSelected(Crime crime);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mCallbacks = (Callbacks) context;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,6 +60,27 @@ public class CrimeListFragment extends Fragment {
         mCrimeRecyclerView = (RecyclerView) view
                 .findViewById(R.id.crime_recycler_view);
         mCrimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        // Add ItemTouchHelper to CrimeRecyclerView to enable swipe-to-dismiss
+        ItemTouchHelper mIth = new ItemTouchHelper(
+                new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
+                        ItemTouchHelper.LEFT) {
+                    public boolean onMove(RecyclerView recyclerView,
+                                          ViewHolder viewHolder,
+                                          ViewHolder target) {
+                        return false;
+                    }
+                    public void onSwiped(ViewHolder viewHolder, int direction) {
+                        // remove from adapter
+                        List<Crime> crimes = CrimeLab.get(getActivity()).getCrimes();
+                        Crime crimeToRemove = crimes.get(viewHolder.getAdapterPosition());
+                        CrimeLab.get(getActivity()).deleteCrime(crimeToRemove);
+                        crimes.remove(crimeToRemove);
+                        mAdapter.setmCrimes(crimes);
+                        mAdapter.notifyDataSetChanged();
+                    }
+                });
+        mIth.attachToRecyclerView(mCrimeRecyclerView);
 
         if (savedInstanceState != null) {
             mSubtitleVisible = savedInstanceState.getBoolean(SAVED_SUBTITLE_VISIBLE);
@@ -65,6 +104,12 @@ public class CrimeListFragment extends Fragment {
     }
 
     @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_crime_list, menu);
@@ -84,8 +129,8 @@ public class CrimeListFragment extends Fragment {
                 mCrimeChangedId = -1;
                 Crime crime = new Crime();
                 CrimeLab.get(getActivity()).addCrime(crime);
-                Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.getId());
-                startActivity(intent);
+                updateUI();
+                mCallbacks.onCrimeSelected(crime);
                 return true;
             case R.id.show_subtitle:
                 mSubtitleVisible = !mSubtitleVisible;
@@ -107,6 +152,25 @@ public class CrimeListFragment extends Fragment {
        }
     }
 
+    public void updateUI() {
+        CrimeLab crimeLab = CrimeLab.get(getActivity());
+        final List<Crime> crimes = crimeLab.getCrimes();
+
+        if (mAdapter == null) {
+            mAdapter = new CrimeAdapter(crimes);
+            mCrimeRecyclerView.setAdapter(mAdapter);
+        } else {
+            mAdapter.setmCrimes(crimes);
+            if (mCrimeChangedId != -1) {
+                mAdapter.notifyItemChanged(mCrimeChangedId);
+            } else {
+                mAdapter.notifyDataSetChanged();
+            }
+        }
+
+        updateSubtitle();
+    }
+
     private void updateSubtitle() {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         int crimeCount = crimeLab.getCrimes().size();
@@ -120,27 +184,7 @@ public class CrimeListFragment extends Fragment {
         activity.getSupportActionBar().setSubtitle(subtitle);
     }
 
-    private void updateUI() {
-        CrimeLab crimeLab = CrimeLab.get(getActivity());
-        List<Crime> crimes = crimeLab.getCrimes();
-
-        if (mAdapter == null) {
-            mAdapter = new CrimeAdapter(crimes);
-            mCrimeRecyclerView.setAdapter(mAdapter);
-        } else {
-            mAdapter.setmCrimes(crimes);
-            Log.d("DELETE_DEBUG", "mCrimeChangedID = " + mCrimeChangedId);
-            if (mCrimeChangedId != -1) {
-                mAdapter.notifyItemChanged(mCrimeChangedId);
-            } else {
-                mAdapter.notifyDataSetChanged();
-            }
-        }
-
-        updateSubtitle();
-    }
-
-    private class CrimeHolder extends RecyclerView.ViewHolder
+    private class CrimeHolder extends ViewHolder
             implements View.OnClickListener {
 
         private Crime mCrime;
@@ -170,8 +214,7 @@ public class CrimeListFragment extends Fragment {
         @Override
         public void onClick(View view) {
             mCrimeChangedId = mIndex;
-            Intent intent = CrimePagerActivity.newIntent(getActivity(), mCrime.getId());
-            startActivityForResult(intent, REQUEST_EDIT);
+            mCallbacks.onCrimeSelected(mCrime);
         }
     }
 
