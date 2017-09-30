@@ -1,5 +1,6 @@
 package com.bignerdranch.android.photogallery;
 
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -59,6 +61,18 @@ public class PhotoGalleryFragment extends Fragment {
                     mFetchItemTask.execute(currentMaxPages++);
                     Log.i(TAG, "Reached end of list");
                 }
+            }
+        });
+        mPhotoRecyclerView.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                mPhotoRecyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                float width  = mPhotoRecyclerView.getMeasuredWidth();
+                float item_width = getResources().getDimension(R.dimen.gallery_item_width);
+                int columns = Math.max((int) (width / item_width), 1);
+                Log.i(TAG, "width: " + width + ", item_width: " + item_width + ", columns: " + columns);
+                mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), columns));
             }
         });
 
