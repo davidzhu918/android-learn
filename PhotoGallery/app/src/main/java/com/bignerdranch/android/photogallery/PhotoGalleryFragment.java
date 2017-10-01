@@ -144,11 +144,13 @@ public class PhotoGalleryFragment extends Fragment {
         public PhotoHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(getActivity());
             View view = inflater.inflate(R.layout.list_item_gallery, parent, false);
-            return new PhotoHolder(view);
+            PhotoHolder photoHolder = new PhotoHolder(view);
+            return photoHolder;
         }
 
         @Override
         public void onBindViewHolder(PhotoHolder holder, int position) {
+            Log.i(TAG, "onBindViewHolder at position: " + position);
             GalleryItem galleryItem = mGalleryItems.get(position);
             // Drawable placeholder = getResources().getDrawable(R.drawable.bill_up_close);
             // holder.bindDrawable(placeholder);
