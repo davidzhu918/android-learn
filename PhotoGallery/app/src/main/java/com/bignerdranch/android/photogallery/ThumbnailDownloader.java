@@ -109,6 +109,11 @@ public class ThumbnailDownloader<T> extends HandlerThread {
                 Log.i(TAG, "Bitmap created");
             }
 
+//            byte[] bitmapBytes = new FlickrFetchr().getUrlBytes(url);
+//            bitmap = BitmapFactory.decodeByteArray(bitmapBytes, 0, bitmapBytes.length);
+//            mLruCache.put(url, bitmap);
+//            Log.i(TAG, "Bitmap created");
+
             if (notifyThumbnailDownloadedListener) {
                 mResponseHandler.post(new Runnable() {
                     @Override
