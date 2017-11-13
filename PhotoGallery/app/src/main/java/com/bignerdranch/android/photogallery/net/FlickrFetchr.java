@@ -1,8 +1,9 @@
-package com.bignerdranch.android.photogallery;
+package com.bignerdranch.android.photogallery.net;
 
 import android.net.Uri;
 import android.util.Log;
 
+import com.bignerdranch.android.photogallery.net.Gallery.GalleryItem;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -18,7 +19,6 @@ import java.util.List;
 /**
  * Created by zixiangz on 9/23/17.
  */
-
 public class FlickrFetchr {
     private static final String TAG = "FlickrFetchr";
 

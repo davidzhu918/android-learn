@@ -1,7 +1,6 @@
 package com.bignerdranch.android.photogallery;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -9,7 +8,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -24,6 +22,12 @@ import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 
+import com.bignerdranch.android.photogallery.net.FlickrFetchr;
+import com.bignerdranch.android.photogallery.net.Gallery.GalleryItem;
+import com.bignerdranch.android.photogallery.net.ThumbnailDownloader;
+import com.bignerdranch.android.photogallery.service.PollService;
+import com.bignerdranch.android.photogallery.service.PollServiceFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,13 +35,14 @@ import java.util.List;
  * Created by zixiangz on 9/23/17.
  */
 
-public class PhotoGalleryFragment extends Fragment {
+public class PhotoGalleryFragment extends VisibleFragment {
     private static final String TAG = "PhotoGalleryFragment";
 
     private RecyclerView mPhotoRecyclerView;
     private PhotoAdapter mAdapter;
     private int currentMaxPages;
     private ThumbnailDownloader<PhotoHolder> mThumbnailDownloader;
+    private final PollService pollService;
 
     public static PhotoGalleryFragment newInstance() {
         return new PhotoGalleryFragment();
@@ -46,6 +51,7 @@ public class PhotoGalleryFragment extends Fragment {
     public PhotoGalleryFragment() {
         mAdapter = new PhotoAdapter(new ArrayList<GalleryItem>());
         currentMaxPages = 1;
+        pollService = PollServiceFactory.getPollService();
     }
 
     @Override
@@ -54,10 +60,6 @@ public class PhotoGalleryFragment extends Fragment {
         setRetainInstance(true);
         setHasOptionsMenu(true);
         updateItems(1);
-
-//        Intent i = PollService.newIntent(getActivity());
-//        getActivity().startService(i);
-        PollService.setServiceAlarm(getActivity(), true);
 
         Handler responseHandler = new Handler();
         mThumbnailDownloader = new ThumbnailDownloader<>(responseHandler);
@@ -170,6 +172,13 @@ public class PhotoGalleryFragment extends Fragment {
                 searchView.setQuery(query, false);
             }
         });
+
+        MenuItem toggleItem = menu.findItem(R.id.menu_item_toggle_polling);
+        if (pollService.isServiceOn(getActivity())) {
+            toggleItem.setTitle(R.string.stop_polling);
+        } else {
+            toggleItem.setTitle(R.string.start_polling);
+        }
     }
 
     @Override
@@ -179,6 +188,11 @@ public class PhotoGalleryFragment extends Fragment {
                 // clear search query string before executing search task.
                 QueryPreferences.setStoredQuery(getActivity(), null);
                 updateItems(1);
+                return true;
+            case R.id.menu_item_toggle_polling:
+                boolean shouldStartAlarm = !pollService.isServiceOn(getActivity());
+                pollService.setServiceJob(getActivity(), shouldStartAlarm);
+                getActivity().invalidateOptionsMenu(); // update toolbar option menu.
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

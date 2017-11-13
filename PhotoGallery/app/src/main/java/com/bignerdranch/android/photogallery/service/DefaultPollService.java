@@ -1,5 +1,6 @@
-package com.bignerdranch.android.photogallery;
+package com.bignerdranch.android.photogallery.service;
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.Notification;
@@ -11,28 +12,29 @@ import android.net.ConnectivityManager;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
+import com.bignerdranch.android.photogallery.PhotoGalleryActivity;
+import com.bignerdranch.android.photogallery.QueryPreferences;
+import com.bignerdranch.android.photogallery.R;
+import com.bignerdranch.android.photogallery.net.FlickrFetchr;
+import com.bignerdranch.android.photogallery.net.Gallery.GalleryItem;
+
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by zixiangz on 10/12/17.
  */
 
-public class PollService extends IntentService {
-    private static final String TAG = "PollService";
+public class DefaultPollService extends IntentService implements PollService {
 
-    // Set interval to 1 minute.
-    private static final long POLL_INTERVAL_MS = TimeUnit.MINUTES.toMillis(1);
-
-    public static Intent newIntent(Context context) {
-        return new Intent(context, PollService.class);
+    private static Intent newIntent(Context context) {
+        return new Intent(context, DefaultPollService.class);
     }
 
-    public static void setServiceAlarm(Context context, boolean isOn) {
-        Intent i = PollService.newIntent(context);
+    @Override
+    public void setServiceJob(Context context, boolean isOn) {
+        Intent i = DefaultPollService.newIntent(context);
         PendingIntent pi = PendingIntent.getService(context, 0, i, 0);
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -44,15 +46,19 @@ public class PollService extends IntentService {
             alarmManager.cancel(pi);
             pi.cancel();
         }
+
+        QueryPreferences.setAlarmOn(context, isOn);
     }
 
-    public static boolean isServiceAlarmOn(Context context) {
-        Intent i = PollService.newIntent(context);
-        PendingIntent pi = PendingIntent.getService(context, 0, i, PendingIntent.FLAG_IMMUTABLE);
+    @Override
+    public boolean isServiceOn(Context context) {
+        Intent i = DefaultPollService.newIntent(context);
+        PendingIntent pi = PendingIntent
+                .getService(context, 0, i, PendingIntent.FLAG_NO_CREATE);
         return pi != null;
     }
 
-    public PollService() {
+    public DefaultPollService() {
         super(TAG);
     }
 
@@ -97,12 +103,18 @@ public class PollService extends IntentService {
                     .setAutoCancel(true)
                     .build();
 
-            NotificationManagerCompat notificationManagerCompat =
-                    NotificationManagerCompat.from(this);
-            notificationManagerCompat.notify(0, notification);
+            showBackgroundNotification(0, notification);
         }
 
         QueryPreferences.setLastResultId(this, resultId);
+    }
+
+    private void showBackgroundNotification(int requestCode, Notification notification) {
+        Intent i = new Intent(ACTION_SHOW_NOTIFICATION);
+        i.putExtra(REQUEST_CODE, requestCode);
+        i.putExtra(NOTIFICATION, notification);
+        sendOrderedBroadcast(i, PERM_PRIVATE, null, null,
+                Activity.RESULT_OK, null, null);
     }
 
     private boolean isNetworkAvailableAndConnected() {
