@@ -7,7 +7,6 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Created by zixiangz on 9/28/17.
  */
-
 public class Gallery {
     GalleryPhotoCollection photos;
 

@@ -17,6 +17,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity android:name=".PhotoGalleryActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -24,12 +25,17 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity
+            android:name=".PhotoPageActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"/>
+
         <service android:name=".service.DefaultPollService" />
         <service
             android:name=".service.JobPollService"
             android:permission="android.permission.BIND_JOB_SERVICE"
             android:exported="true"
             />
+
         <receiver android:name=".service.StartupReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
@@ -41,6 +47,7 @@
                 <action android:name="com.bignerdranch.android.photogallery.SHOW_NOTIFICATION" />
             </intent-filter>
         </receiver>
+
     </application>
 
 </manifest>
