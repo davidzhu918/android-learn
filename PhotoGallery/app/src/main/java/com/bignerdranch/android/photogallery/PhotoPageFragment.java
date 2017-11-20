@@ -17,7 +17,7 @@ import android.widget.ProgressBar;
 
 public class PhotoPageFragment extends VisibleFragment
     implements PhotoPageActivity.BackPressedListener {
-    
+
     private static final String ARG_URI = "photo_page_url";
 
     private Uri mUri;

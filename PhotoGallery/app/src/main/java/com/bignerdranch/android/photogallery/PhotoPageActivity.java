@@ -31,7 +31,7 @@ public class PhotoPageActivity extends SingleFragmentActivity {
 
     @Override
     public void onBackPressed() {
-        if (!backPressedListener.onBackPressed()) {
+        if (backPressedListener == null || !backPressedListener.onBackPressed()) {
             super.onBackPressed();
         }
     }
