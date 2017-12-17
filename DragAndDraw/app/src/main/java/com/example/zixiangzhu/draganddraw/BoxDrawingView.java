@@ -8,8 +8,10 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.FrameLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +20,7 @@ import java.util.List;
  * Created by zixiangzhu on 11/26/17.
  */
 
-public class BoxDrawingView extends View {
+public class BoxDrawingView extends FrameLayout {
     private static final String TAG = "BoxDrawingView";
 
     private Box mCurrentBox;
@@ -53,6 +55,7 @@ public class BoxDrawingView extends View {
                 // Reset drawing state
                 mCurrentBox = new Box(current);
                 mBoxen.add(mCurrentBox);
+                setTranslationX(1);
                 break;
             case MotionEvent.ACTION_MOVE:
                 action = "ACTION_MOVE";
@@ -73,6 +76,7 @@ public class BoxDrawingView extends View {
         Log.i(TAG, action + " at x = " + current.x + ", y = " + current.y);
         return true;
     }
+
 
     @Override
     public void onDraw(Canvas canvas) {

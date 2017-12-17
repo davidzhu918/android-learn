@@ -23,6 +23,12 @@ public class Gallery {
         @SerializedName("owner")
         private String mOwner;
 
+        @SerializedName("latitute")
+        private double mLat;
+
+        @SerializedName("longitude")
+        private double mLon;
+
         public String getId() {
             return mId;
         }
@@ -43,11 +49,18 @@ public class Gallery {
                     .build();
         }
 
+        public double getLat() {
+            return mLat;
+        }
+
+        public double getLon() {
+            return mLon;
+        }
+
         @Override
         public String toString() {
             return mCaption;
         }
-
     }
 
     class GalleryPhotoCollection {

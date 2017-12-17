@@ -1,6 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.example.zixiangzhu.draganddraw.BoxDrawingView
+
+<android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/box_view"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_height="match_parent"
-    android:layout_width="match_parent" />
+    android:layout_width="match_parent" >
+
+    <com.example.zixiangzhu.draganddraw.BoxDrawingView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/box_view"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent" />
+    
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:background="@color/colorPrimary"
+        app:layout_behavior="com.example.zixiangzhu.draganddraw.CustomBehavior">
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent" android:layout_height="30dp"
+        android:background="@color/colorAccent"
+        android:layout_gravity="bottom|center"/>
+</android.support.design.widget.CoordinatorLayout>
